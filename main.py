@@ -37,7 +37,7 @@ def start_message1(message):
       bot.send_message(message.chat.id,'до встречи')
 
 
-
+1234567890
 
 
 
