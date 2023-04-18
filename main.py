@@ -1,3 +1,5 @@
+import re
+
 import telebot
 import json
 from selenium import webdriver
@@ -18,8 +20,11 @@ keybord2 = telebot.types.ReplyKeyboardMarkup(True)
 keybord2.row('включить уведомления', 'выключить уведомления', 'обратно')
 from selenium.webdriver.common.by import By
 from  bs4 import *
-
-
+alf = 'йцукенгшщзхъфывапролджэячсмитьбюё'
+Alf= alf.upper()
+print(Alf[2])
+counter = 0
+a=0
 
 
 
@@ -27,33 +32,13 @@ from  bs4 import *
 @bot.message_handler(commands=['start'])
 def start_message(message):
    bot.send_message(message.chat.id,'что вы хотите сделать?',reply_markup=keybord1 )
-
+   counter = 1
 @bot.message_handler(content_types=['text'])
 def start_message1(message):
    if message.text=='найти актеров по контенту':
       bot.send_message(message.chat.id,'хорошо, введите название контента')
-      @bot.message_handler(content_types=['text'])
-      def start_message123(message):
-         print(message.text)
+      counter=1
 
-
-         browser = webdriver.Chrome()
-         browser.get("https://www.kinopoisk.ru/?utm_referrer=yandex.by")
-         search = browser.find_element(By.NAME, 'kp_query')  # search element by name
-         search.send_keys('message')  # enter prompt in the search field
-         find = browser.find_element(By.CSS_SELECTOR,
-                                     '#__next > div.styles_root__nRLZC > div.styles_root__BJH2_.styles_headerContainer__f7XqC > header > div > div.styles_mainContainer__faOVn.styles_hasSidebar__rU_E2 > div.styles_searchFormContainerWide__3taA3.styles_searchFormContainer__GyAL5 > div > form > div > div > button > svg')  # search element by css selector
-         find.click()
-         find2 = browser.find_element(By.CSS_SELECTOR,
-                                      '#block_left_pad > div > div:nth-child(4) > p.header > a')  # search element by css selector
-         find2.click()
-         find3 = browser.find_element(By.CSS_SELECTOR,
-                                      '#block_left_pad > div > div.search_results.search_results_last > div:nth-child(4) > div.right > ul > li:nth-child(1) > a')  # search element by css selector
-         find3.click()
-
-         soup = BeautifulSoup(browser.page_source, 'html.parser')
-         series = soup.find_all('div', class_='actorInfo')
-         print(series)
 
 
 
@@ -77,18 +62,55 @@ def start_message1(message):
             bot.send_message(message.chat.id,'хорошо', reply_markup=keybord1)
             start_message(message)
 
+   else:
+          browser = webdriver.Chrome()
+          browser.get("https://www.kinopoisk.ru/?utm_referrer=yandex.by")
+          search = browser.find_element(By.NAME, 'kp_query')  # search element by name
+          search.send_keys(message.text)  # enter prompt in the search field
+          find = browser.find_element(By.CSS_SELECTOR,
+                                      '#__next > div.styles_root__nRLZC > div.styles_root__BJH2_.styles_headerContainer__f7XqC > header > div > div.styles_mainContainer__faOVn.styles_hasSidebar__rU_E2 > div.styles_searchFormContainerWide__3taA3.styles_searchFormContainer__GyAL5 > div > form > div > div > button > svg')  # search element by css selector
+          find.click()
+          # find2 = browser.find_element(By.CSS_SELECTOR,
+          #                              '#block_left_pad > div > div:nth-child(3) > div > div.info > p > a')  # search element by css selector
+          # find2.click()
 
+          find2 = browser.find_element(By.CSS_SELECTOR,
+                                       '#block_left_pad > div > div:nth-child(3) > div > div.info > p > a')  # search element by css selector
+          find2.click()
+          # find3 = browser.find_element(By.CLASS_NAME,
+          #                              'styles_title__qKISE')  # search element by css selector
+          # find3.click()
+          actrs = []
+          soup = BeautifulSoup(browser.page_source, 'html.parser')
 
+          act = soup.find_all('ul', class_='styles_list___ufg4')
 
+          for actors in act:
+             if actors:
+                # actrs1 = actors.text.strip()
+                # actrs.append(str(actrs1))
+                elements = [element.text.strip() for element in soup.find_all('li')]
+                result = ' '.join(elements)
+                result=str(result)
 
+             else:
+                actrs1 = "Not found"
+                actrs.append(actrs1)
+             # for i in range(len(actrs)):
+             #         for c in range(len(alf)):
+             #                  if actrs[i]==Alf[c]:
+             #                           print(i)
 
-
-
-
-
-
-
-
+          # str= series[find('/">'):find('</a>')]
+          # str1=str(series)
+          # pos =str1.find('<div class="num">1.</div>')
+          # print(pos)
+          bot.send_message(message.chat.id, result)
+  # for i in range(len(actrs)):
+  #                     for c in range(len(alf)):
+  #                        if actrs[i]==Alf[c]:
+  #                           print('a')
 
 bot.polling()
 
+# Попробуйте изменить запрос. Многие фильмы имеют несколько названий, а фамилии актеров — разные варианты написаний на русском языке.
